@@ -234,11 +234,23 @@
 
     <div class="glass-panel" style="padding:2rem; background:rgba(0,0,0,0.5);">
       <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
-        <i data-feather="terminal" style="color:var(--cyan-primary);"></i> Quick Deployment in 1 Command
+        <i data-feather="terminal" style="color:var(--cyan-primary);"></i> Quick Node Deployment
       </h3>
-      <div class="code-snippet" style="font-family:var(--font-mono); font-size:0.9rem; padding:1.2rem; margin-bottom:1.5rem; word-break:break-all;">
-        git clone https://github.com/Alerod427/QCOIN-Blockchain.git && cd QCOIN-Blockchain && ./start_qcoin_all.sh
+      
+      <div style="margin-bottom:1rem;">
+        <strong style="color:var(--cyan-primary); display:block; margin-bottom:0.4rem;">🐧 Linux / macOS / VPS:</strong>
+        <div class="code-snippet" style="font-family:var(--font-mono); font-size:0.85rem; padding:1rem; word-break:break-all;">
+          git clone https://github.com/Alerod427/QCOIN-Blockchain.git && cd QCOIN-Blockchain && ./start_qcoin_all.sh
+        </div>
       </div>
+
+      <div style="margin-bottom:1.5rem;">
+        <strong style="color:var(--emerald-accent); display:block; margin-bottom:0.4rem;">🪟 Windows Users (WSL2 / Docker Desktop):</strong>
+        <div class="code-snippet" style="font-family:var(--font-mono); font-size:0.85rem; padding:1rem; word-break:break-all;">
+          git clone https://github.com/Alerod427/QCOIN-Blockchain.git && cd QCOIN-Blockchain && run_validator_windows.bat
+        </div>
+      </div>
+
       <a href="https://github.com/Alerod427/QCOIN-Blockchain/blob/master/docs/VALIDATOR_GUIDE.md" target="_blank" class="btn-primary" style="text-decoration:none;">
         <i data-feather="book-open"></i> View Full Validator Operator Guide
       </a>

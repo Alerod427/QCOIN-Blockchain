@@ -50,6 +50,34 @@ The script will automatically compile the release binary, start the QCOIN valida
 
 ---
 
+## 🪟 Running a QCOIN Validator on Windows
+
+Running a QCOIN node on Windows is fast and simple. You can use any of the 2 methods below:
+
+### Method 1: WSL2 (Windows Subsystem for Linux) - Recommended
+
+1. **Enable WSL2**: Open **PowerShell as Administrator** and run:
+   ```powershell
+   wsl --install
+   ```
+   *(Restart your computer if prompted)*.
+
+2. **Open Ubuntu Terminal**: Open Ubuntu from your Windows Start Menu and run:
+   ```bash
+   git clone https://github.com/Alerod427/QCOIN-Blockchain.git
+   cd QCOIN-Blockchain
+   chmod +x start_qcoin_all.sh
+   ./start_qcoin_all.sh
+   ```
+
+### Method 2: 1-Click Launcher (Docker for Windows)
+
+1. **Install Docker Desktop**: Download and install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/).
+2. **Double-Click Launcher**: Double-click `run_validator_windows.bat` in the QCOIN repository folder.
+3. The script will automatically start your QCOIN Validator Node in background!
+
+---
+
 ## 📊 Monitoring Your Node
 
 - **View Live Logs**:
