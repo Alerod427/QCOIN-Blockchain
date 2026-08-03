@@ -1,0 +1,14 @@
+{
+  "slug": "qcoin_mainnet",
+  "name": "QCOIN Mainnet",
+  "isTestnet": false,
+  "chainStatus": "ACTIVE",
+  "providers": {
+    "QCOIN Official Node": "wss://forbes-antibody-pickup-swap.trycloudflare.com"
+  },
+  "symbol": "QCOIN",
+  "decimals": 12,
+  "ss58Format": 42,
+  "evmChainId": null,
+  "icon": "qcoin.png"
+}

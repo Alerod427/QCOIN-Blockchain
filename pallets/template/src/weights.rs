@@ -36,6 +36,8 @@ use core::marker::PhantomData;
 pub trait WeightInfo {
 	fn do_something() -> Weight;
 	fn cause_error() -> Weight;
+	fn register_pq_public_key() -> Weight;
+	fn verify_pq_signature() -> Weight;
 }
 
 /// Weights for pallet_template using the Substrate node and recommended hardware.
@@ -62,6 +64,15 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
+	fn register_pq_public_key() -> Weight {
+		Weight::from_parts(15_000_000, 2000)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	fn verify_pq_signature() -> Weight {
+		Weight::from_parts(50_000_000, 4000)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 }
 
 // For backwards compatibility and tests
@@ -84,6 +95,15 @@ impl WeightInfo for () {
 		//  Estimated: `1489`
 		// Minimum execution time: 6_000_000 picoseconds.
 		Weight::from_parts(6_000_000, 1489)
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn register_pq_public_key() -> Weight {
+		Weight::from_parts(15_000_000, 2000)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn verify_pq_signature() -> Weight {
+		Weight::from_parts(50_000_000, 4000)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}

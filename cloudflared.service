@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudflare Tunnel Service for QCOIN RPC
+After=network.target
+
+[Service]
+Type=simple
+User=alerod
+ExecStart=/tmp/cloudflared tunnel --url http://127.0.0.1:9944
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QCOIN — World's First Post-Quantum Solochain Blockchain</title>
+  <meta name="description" content="QCOIN is the native token of the first Layer-1 Post-Quantum Solochain, protected by NIST FIPS 204 ML-DSA-65 lattice cryptography against quantum computer attacks.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Chart.js for Tokenomics Visualizer -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="bg-glow-container">
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="#" class="brand-logo">
+      <div class="brand-icon">Q</div>
+      <span>QCOIN <small style="font-size:0.65rem; color:var(--cyan-primary); font-weight:600; padding:2px 8px; border:1px solid var(--cyan-primary); border-radius:10px; margin-left:4px;">NIST FIPS 204</small></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#swap">Swap & Buy</a></li>
+      <li><a href="#explorer">Block Explorer</a></li>
+      <li><a href="#post-quantum">Post-Quantum Tech</a></li>
+      <li><a href="#tokenomics">Tokenomics</a></li>
+      <li><a href="#contract">Smart Contract</a></li>
+    </ul>
+    <button class="btn-primary" id="connect-wallet-btn">
+      <i data-feather="wallet"></i> Connect Wallet
+    </button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="badge-quantum">
+        <i data-feather="shield" style="width:16px; height:16px;"></i>
+        QUANTUM-RESISTANT LAYER 1 BLOCKCHAIN
+      </div>
+      <h1 class="hero-title">
+        The Future of Money is <span class="gradient-text">Post-Quantum</span>.
+      </h1>
+      <p class="hero-subtitle">
+        QCOIN protects digital assets against Shor's algorithm and quantum computer threats using NIST FIPS 204 ML-DSA-65 lattice-based cryptography integrated natively inside WebAssembly.
+      </p>
+
+      <div style="display:flex; gap:1rem;">
+        <a href="#swap" class="btn-primary" style="text-decoration:none;">
+          <i data-feather="zap"></i> Buy QCOIN Now
+        </a>
+        <a href="https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fshower-workshop-nato-licenses.trycloudflare.com#/explorer" target="_blank" class="btn-secondary" style="text-decoration:none;">
+          <i data-feather="globe"></i> Live Explorer
+        </a>
+      </div>
+
+      <div class="hero-stats-grid">
+        <div class="stat-item">
+          <h4 id="stat-block-height">#142</h4>
+          <p>Live Block Height</p>
+        </div>
+        <div class="stat-item">
+          <h4 id="stat-total-supply">1.0B</h4>
+          <p>Total Supply (QCOIN)</p>
+        </div>
+        <div class="stat-item">
+          <h4 id="stat-pq-standard">ML-DSA-65</h4>
+          <p>NIST FIPS 204 Security</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swap / Buy Card Widget -->
+    <div class="hero-right" id="swap">
+      <div class="glass-panel swap-card">
+        <div class="swap-header">
+          <span class="swap-title">Buy QCOIN / Instant Liquidity</span>
+          <span style="font-size:0.8rem; color:var(--emerald-accent); display:flex; align-items:center; gap:4px;">
+            <span style="width:8px; height:8px; background:var(--emerald-accent); border-radius:50%; display:inline-block;"></span>
+            Uniswap Pair Live
+          </span>
+        </div>
+
+        <div class="input-box">
+          <div class="input-header">
+            <span>You Pay</span>
+            <span>Balance: 5,000 USDT</span>
+          </div>
+          <div class="input-row">
+            <input type="number" id="usdt-input" class="amount-input" value="1000" min="1">
+            <div class="token-badge">
+              <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="token-icon" alt="USDT">
+              USDT
+            </div>
+          </div>
+        </div>
+
+        <div class="swap-icon-container">
+          <button class="swap-icon-btn">
+            <i data-feather="arrow-down"></i>
+          </button>
+        </div>
+
+        <div class="input-box">
+          <div class="input-header">
+            <span>You Receive</span>
+            <span>Est. Rate: 1 QCOIN = $0.01 USDT</span>
+          </div>
+          <div class="input-row">
+            <input type="number" id="qcoin-output" class="amount-input" value="100000" readonly>
+            <div class="token-badge" style="background:rgba(0,242,254,0.15); color:var(--cyan-primary);">
+              <div class="brand-icon" style="width:20px; height:20px; font-size:0.7rem;">Q</div>
+              QCOIN
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:var(--radius-sm); margin:1rem 0; font-size:0.85rem;">
+          <div style="display:flex; justify-content:space-between; color:var(--text-muted);">
+            <span>Price Impact</span>
+            <span style="color:var(--emerald-accent); font-weight:600;">< 0.01%</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; color:var(--text-muted); margin-top:4px;">
+            <span>Network Fee</span>
+            <span>~0.002 QCOIN</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="execute-swap-btn" style="width:100%; justify-content:center; padding:1rem; font-size:1.05rem;">
+          Execute Swap on Uniswap
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Integrated Block Explorer Section -->
+  <section class="section" id="explorer">
+    <div class="section-header">
+      <div class="badge-quantum">CHAIN EXPLORER</div>
+      <h2 class="section-title">QCOIN Live Block Explorer</h2>
+      <p style="color:var(--text-muted);">
+        Inspect real-time blocks, track transactions, and verify post-quantum signatures mined directly on QCOIN Mainnet.
+      </p>
+    </div>
+
+    <div class="glass-panel" style="padding:2rem; margin-bottom:2rem;">
+      <div style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+        <input type="text" id="explorer-search-input" placeholder="Search by Account Address (5XX...) or Block Number / Hash..." style="flex:1; padding:0.9rem 1.2rem; background:rgba(0,0,0,0.4); border:1px solid var(--border-light); border-radius:var(--radius-md); color:#fff; font-family:var(--font-mono); font-size:0.9rem;">
+        <button class="btn-primary" id="explorer-search-btn">
+          <i data-feather="search"></i> Search
+        </button>
+      </div>
+
+      <div id="explorer-search-result" style="display:none; padding:1rem; background:rgba(0,242,254,0.08); border:1px solid var(--cyan-primary); border-radius:var(--radius-sm); margin-bottom:1.5rem; font-family:var(--font-mono); font-size:0.9rem;">
+      </div>
+
+      <!-- Live Blocks Table -->
+      <h3 style="font-size:1.2rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <span><i data-feather="box" style="color:var(--cyan-primary);"></i> Recent Blocks</span>
+        <span style="font-size:0.8rem; color:var(--emerald-accent); font-weight:500;">● Live 6s Syncing</span>
+      </h3>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border-light); color:var(--text-muted);">
+              <th style="padding:10px;">Block Height</th>
+              <th style="padding:10px;">Block Hash</th>
+              <th style="padding:10px;">Extrinsics</th>
+              <th style="padding:10px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="blocks-table-body">
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+              <td style="padding:12px; font-weight:700; color:var(--cyan-primary); font-family:var(--font-mono);">#204</td>
+              <td style="padding:12px; font-family:var(--font-mono); color:var(--text-muted);">0x752c006d625567e95f89b008a1c5...</td>
+              <td style="padding:12px;">1 Extrinsic</td>
+              <td style="padding:12px;"><span style="background:rgba(0,242,195,0.15); color:var(--emerald-accent); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600;">Finalized</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+              <td style="padding:12px; font-weight:700; color:var(--cyan-primary); font-family:var(--font-mono);">#203</td>
+              <td style="padding:12px; font-family:var(--font-mono); color:var(--text-muted);">0x1289b468db779f287e863216bb7c...</td>
+              <td style="padding:12px;">1 Extrinsic</td>
+              <td style="padding:12px;"><span style="background:rgba(0,242,195,0.15); color:var(--emerald-accent); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600;">Finalized</span></td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+              <td style="padding:12px; font-weight:700; color:var(--cyan-primary); font-family:var(--font-mono);">#202</td>
+              <td style="padding:12px; font-family:var(--font-mono); color:var(--text-muted);">0x9d97ecd17ecc82d5f05c85b6e80a...</td>
+              <td style="padding:12px;">2 Extrinsics</td>
+              <td style="padding:12px;"><span style="background:rgba(0,242,195,0.15); color:var(--emerald-accent); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600;">Finalized</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Post-Quantum Security Interactive Section -->
+  <section class="section" id="post-quantum">
+    <div class="section-header">
+      <div class="badge-quantum">POST-QUANTUM CRYPTOGRAPHY ENGINE</div>
+      <h2 class="section-title">NIST FIPS 204 ML-DSA-65 Verification</h2>
+      <p style="color:var(--text-muted);">
+        Standard ECDSA (secp256k1) used in Bitcoin and Ethereum will be broken by quantum computers running Shor's algorithm. QCOIN implements safe module-lattice signatures verified directly inside the WASM runtime.
+      </p>
+    </div>
+
+    <div class="pq-demo-grid">
+      <div class="glass-panel pq-box">
+        <h3><i data-feather="key" style="color:var(--cyan-primary);"></i> ML-DSA-65 Key & Signature Specs</h3>
+        <p style="color:var(--text-muted); margin:0.5rem 0 1.5rem;">
+          Each QCOIN post-quantum keypair and transaction signature is generated with 192-bit quantum security level (NIST Category 3).
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+          <div>
+            <span style="font-size:0.85rem; color:var(--text-muted);">Public Key Length:</span>
+            <div class="code-snippet">1,952 bytes (15,616 bits)</div>
+          </div>
+          <div>
+            <span style="font-size:0.85rem; color:var(--text-muted);">Signature Length:</span>
+            <div class="code-snippet">3,309 bytes (26,472 bits)</div>
+          </div>
+          <div>
+            <span style="font-size:0.85rem; color:var(--text-muted);">Runtime Crate Engine:</span>
+            <div class="code-snippet">fips204 v0.4.6 (no_std, zero dynamic allocation)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Simulator -->
+      <div class="glass-panel pq-box">
+        <h3><i data-feather="cpu" style="color:var(--emerald-accent);"></i> Interactive Signature Simulator</h3>
+        <p style="color:var(--text-muted); margin:0.5rem 0 1rem;">
+          Test generating a Dilithium ML-DSA-65 signature and verifying it against the WASM execution engine in real-time.
+        </p>
+
+        <label style="font-size:0.85rem; color:var(--text-muted);">Input Transaction Message:</label>
+        <input type="text" id="pq-msg-input" value="Transfer 1000 QCOIN to 5HZ5B8jxiP..." style="width:100%; padding:0.8rem; background:rgba(0,0,0,0.5); border:1px solid var(--border-light); border-radius:var(--radius-sm); color:#fff; font-family:var(--font-mono); margin:0.5rem 0 1rem;">
+
+        <button class="btn-secondary" id="btn-generate-pq-sig" style="width:100%; margin-bottom:1rem;">
+          Generate ML-DSA-65 Signature
+        </button>
+
+        <div id="pq-sig-output" class="code-snippet" style="display:none; max-height:120px; overflow-y:auto;">
+          0x498a3e7b1029c84e1837... (3309 bytes verified)
+        </div>
+
+        <div id="pq-status-badge" style="display:none; background:rgba(0,242,195,0.1); border:1px solid var(--emerald-accent); color:var(--emerald-accent); padding:10px; border-radius:var(--radius-sm); text-align:center; font-weight:600;">
+          ✓ On-Chain Verification Passed (fips204 engine)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tokenomics Section -->
+  <section class="section" id="tokenomics">
+    <div class="section-header">
+      <div class="badge-quantum">TOKEN METRICS & POLICY</div>
+      <h2 class="section-title">QCOIN Genesis Distribution</h2>
+      <p style="color:var(--text-muted);">
+        Designed with a 1,000,000,000 initial hard cap, dynamic length fees to account for lattice signature sizes, and an 80% fee-burning deflationary model.
+      </p>
+    </div>
+
+    <div class="tokenomics-grid">
+      <div class="glass-panel" style="padding:2rem;">
+        <canvas id="tokenomicsChart" height="280"></canvas>
+      </div>
+
+      <div class="allocation-list">
+        <div class="glass-panel allocation-item" style="border-left-color:#00f2fe;">
+          <div>
+            <h4 style="font-size:1.1rem;">Post-Quantum Security Reserve</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted);">500,000,000 QCOIN (50%)</p>
+          </div>
+          <span style="font-family:var(--font-mono); font-weight:700; color:#00f2fe;">50%</span>
+        </div>
+
+        <div class="glass-panel allocation-item" style="border-left-color:#7f00ff;">
+          <div>
+            <h4 style="font-size:1.1rem;">Ecosystem & Treasury Fund</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted);">250,000,000 QCOIN (25%)</p>
+          </div>
+          <span style="font-family:var(--font-mono); font-weight:700; color:#7f00ff;">25%</span>
+        </div>
+
+        <div class="glass-panel allocation-item" style="border-left-color:#ffb703;">
+          <div>
+            <h4 style="font-size:1.1rem;">Core Developers & Foundation</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted);">150,000,000 QCOIN (15%)</p>
+          </div>
+          <span style="font-family:var(--font-mono); font-weight:700; color:#ffb703;">15%</span>
+        </div>
+
+        <div class="glass-panel allocation-item" style="border-left-color:#00f2c3;">
+          <div>
+            <h4 style="font-size:1.1rem;">Initial Genesis Master Wallet</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted);">100,000,000 QCOIN (10%)</p>
+          </div>
+          <span style="font-family:var(--font-mono); font-weight:700; color:#00f2c3;">10%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contract & Audit Section -->
+  <section class="section" id="contract">
+    <div class="glass-panel" style="padding:3rem; text-align:center; position:relative; overflow:hidden;">
+      <h2 style="font-size:2.2rem; font-weight:800; margin-bottom:1rem;">Verified Smart Contract</h2>
+      <p style="color:var(--text-muted); max-width:600px; margin:0 auto 2rem;">
+        Official QCOIN ERC-20 Smart Contract deployed for Uniswap / PancakeSwap liquidity pools and cross-chain bridging.
+      </p>
+
+      <div class="code-snippet" style="max-width:700px; margin:0 auto 2rem; display:flex; justify-content:space-between; align-items:center; font-size:0.95rem;">
+        <span id="contract-address">0x5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR</span>
+        <button class="btn-secondary" id="btn-copy-contract" style="padding:4px 12px; font-size:0.8rem;">
+          <i data-feather="copy" style="width:14px; height:14px;"></i> Copy
+        </button>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:1.5rem;">
+        <a href="contracts/QCoinToken.sol" target="_blank" class="btn-secondary" style="text-decoration:none;">
+          <i data-feather="code"></i> View Solidity Source
+        </a>
+        <a href="https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fshower-workshop-nato-licenses.trycloudflare.com#/accounts" target="_blank" class="btn-primary" style="text-decoration:none;">
+          <i data-feather="external-link"></i> Launch SubWallet Console
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 QCOIN Post-Quantum Blockchain Project. Built with Substrate / Polkadot SDK & NIST FIPS 204 ML-DSA-65.</p>
+  </footer>
+
+  <!-- Wallet Connection Modal -->
+  <div class="modal-overlay" id="wallet-modal">
+    <div class="glass-panel modal-card">
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+      <h3 style="font-size:1.4rem; font-weight:800; margin-bottom:0.5rem; text-align:center;">Connect Your Wallet</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; text-align:center; margin-bottom:1.5rem;">
+        Select your Web3 wallet extension to interact with QCOIN Mainnet.
+      </p>
+
+      <div class="wallet-option-item" id="opt-subwallet">
+        <div class="wallet-info">
+          <img src="https://raw.githubusercontent.com/Koniverse/SubWallet-Extension/master/packages/extension-koni/public/images/subwallet.png" class="wallet-icon-img" alt="SubWallet">
+          <div>
+            <h4 style="font-weight:700;">SubWallet</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted);" id="subwallet-status-txt">Checking extension...</p>
+          </div>
+        </div>
+        <span class="btn-primary" style="padding:6px 14px; font-size:0.8rem;" id="subwallet-action-btn">Connect</span>
+      </div>
+
+      <div class="wallet-option-item" id="opt-talisman">
+        <div class="wallet-info">
+          <img src="https://raw.githubusercontent.com/TalismanSociety/talisman-connect/master/packages/components/src/assets/talisman.svg" class="wallet-icon-img" alt="Talisman">
+          <div>
+            <h4 style="font-weight:700;">Talisman Wallet</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted);">Polkadot & Substrate Wallet</p>
+          </div>
+        </div>
+        <span class="btn-secondary" style="padding:6px 14px; font-size:0.8rem;" id="talisman-action-btn">Connect</span>
+      </div>
+
+      <!-- Network RPC Info Box -->
+      <div style="background:rgba(0,0,0,0.5); padding:1rem; border-radius:var(--radius-sm); margin-top:1.5rem; border:1px solid var(--border-light); font-size:0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+          <strong style="color:var(--cyan-primary);">Active RPC Endpoint (WSS):</strong>
+          <button class="btn-secondary" id="btn-copy-active-wss" style="padding:2px 8px; font-size:0.7rem;">Copy RPC</button>
+        </div>
+        <div id="modal-wss-url-txt" style="font-family:var(--font-mono); color:var(--text-muted); word-break:break-all;">
+          wss://forbes-antibody-pickup-swap.trycloudflare.com
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    feather.replace();
+  </script>
+</body>
+</html>

@@ -68,16 +68,16 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
+	// Import post-quantum FIPS 204 primitives.
+	use fips204::ml_dsa_65;
+	use fips204::traits::{SerDes, Verifier};
+
 	// The `Pallet` struct serves as a placeholder to implement traits, methods and dispatchables
 	// (`Call`s) in this pallet.
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
 	/// The pallet's configuration trait.
-	///
-	/// All our types and constants a pallet depends on must be declared here.
-	/// These types are defined generically and made concrete when the pallet is declared in the
-	/// `runtime/src/lib.rs` file of your chain.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// The overarching runtime event type.
@@ -87,69 +87,65 @@ pub mod pallet {
 	}
 
 	/// A storage item for this pallet.
-	///
-	/// In this template, we are declaring a storage item called `Something` that stores a single
-	/// `u32` value. Learn more about runtime storage here: <https://docs.substrate.io/build/runtime-storage/>
 	#[pallet::storage]
 	pub type Something<T> = StorageValue<_, u32>;
 
+	/// Storage for registered Post-Quantum (ML-DSA-65) public keys.
+	#[pallet::storage]
+	pub type PqPublicKeys<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		BoundedVec<u8, ConstU32<2500>>,
+		OptionQuery,
+	>;
+
+	/// Counter for total post-quantum signatures verified on-chain.
+	#[pallet::storage]
+	pub type VerifiedPqCount<T> = StorageValue<_, u32, ValueQuery>;
+
 	/// Events that functions in this pallet can emit.
-	///
-	/// Events are a simple means of indicating to the outside world (such as dApps, chain explorers
-	/// or other users) that some notable update in the runtime has occurred. In a FRAME pallet, the
-	/// documentation for each event field and its parameters is added to a node's metadata so it
-	/// can be used by external interfaces or tools.
-	///
-	///	The `generate_deposit` macro generates a function on `Pallet` called `deposit_event` which
-	/// will convert the event type of your pallet into `RuntimeEvent` (declared in the pallet's
-	/// [`Config`] trait) and deposit it using [`frame_system::Pallet::deposit_event`].
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// A user has successfully set a new value.
 		SomethingStored {
-			/// The new value set.
 			something: u32,
-			/// The account who set the new value.
 			who: T::AccountId,
+		},
+		/// A post-quantum ML-DSA-65 public key was registered for an account.
+		PqPublicKeyRegistered {
+			who: T::AccountId,
+		},
+		/// A post-quantum ML-DSA-65 signature was successfully verified on-chain.
+		PqSignatureVerified {
+			who: T::AccountId,
+			verified_count: u32,
 		},
 	}
 
 	/// Errors that can be returned by this pallet.
-	///
-	/// Errors tell users that something went wrong so it's important that their naming is
-	/// informative. Similar to events, error documentation is added to a node's metadata so it's
-	/// equally important that they have helpful documentation associated with them.
-	///
-	/// This type of runtime error can be up to 4 bytes in size should you want to return additional
-	/// information.
 	#[pallet::error]
 	pub enum Error<T> {
 		/// The value retrieved was `None` as no value was previously set.
 		NoneValue,
 		/// There was an attempt to increment the value in storage over `u32::MAX`.
 		StorageOverflow,
+		/// Invalid ML-DSA-65 public key length or format (expected 1952 bytes).
+		InvalidPqPublicKey,
+		/// Invalid ML-DSA-65 signature length or format (expected 3309 bytes).
+		InvalidPqSignature,
+		/// Post-Quantum ML-DSA-65 signature verification failed.
+		PqVerificationFailed,
+		/// No Post-Quantum public key found for the account.
+		PqKeyNotFound,
 	}
 
 	/// The pallet's dispatchable functions ([`Call`]s).
-	///
-	/// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	/// These functions materialize as "extrinsics", which are often compared to transactions.
-	/// They must always return a `DispatchResult` and be annotated with a weight and call index.
-	///
-	/// The [`call_index`] macro is used to explicitly
-	/// define an index for calls in the [`Call`] enum. This is useful for pallets that may
-	/// introduce new dispatchables over time. If the order of a dispatchable changes, its index
-	/// will also change which will break backwards compatibility.
-	///
-	/// The [`weight`] macro is used to assign a weight to each call.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// An example dispatchable that takes a single u32 value as a parameter, writes the value
 		/// to storage and emits an event.
-		///
-		/// It checks that the _origin_ for this call is _Signed_ and returns a dispatch
-		/// error if it isn't. Learn more about origins here: <https://docs.substrate.io/build/origins/>
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::do_something())]
 		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
@@ -167,18 +163,6 @@ pub mod pallet {
 		}
 
 		/// An example dispatchable that may throw a custom error.
-		///
-		/// It checks that the caller is a signed origin and reads the current value from the
-		/// `Something` storage item. If a current value exists, it is incremented by 1 and then
-		/// written back to storage.
-		///
-		/// ## Errors
-		///
-		/// The function will return an error under the following conditions:
-		///
-		/// - If no value has been set ([`Error::NoneValue`])
-		/// - If incrementing the value in storage causes an arithmetic overflow
-		///   ([`Error::StorageOverflow`])
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
@@ -197,6 +181,78 @@ pub mod pallet {
 					Ok(())
 				},
 			}
+		}
+
+		/// Register an ML-DSA-65 Post-Quantum Public Key for the caller account.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::register_pq_public_key())]
+		pub fn register_pq_public_key(
+			origin: OriginFor<T>,
+			public_key: BoundedVec<u8, ConstU32<2500>>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			// Validate length (ML-DSA-65 public key size is 1952 bytes)
+			let pk_bytes: &[u8; ml_dsa_65::PK_LEN] = public_key
+				.as_slice()
+				.try_into()
+				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
+
+			// Validate public key structure
+			let _pk = ml_dsa_65::PublicKey::try_from_bytes(*pk_bytes)
+				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
+
+			// Store public key in storage
+			PqPublicKeys::<T>::insert(&who, public_key);
+
+			// Emit event
+			Self::deposit_event(Event::PqPublicKeyRegistered { who });
+
+			Ok(())
+		}
+
+		/// Verify a Post-Quantum ML-DSA-65 signature on-chain against the stored public key of the caller.
+		#[pallet::call_index(3)]
+		#[pallet::weight(T::WeightInfo::verify_pq_signature())]
+		pub fn verify_pq_signature(
+			origin: OriginFor<T>,
+			message: BoundedVec<u8, ConstU32<1024>>,
+			signature: BoundedVec<u8, ConstU32<4000>>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			// Retrieve caller's registered post-quantum public key
+			let stored_pk = PqPublicKeys::<T>::get(&who).ok_or(Error::<T>::PqKeyNotFound)?;
+
+			let pk_bytes: &[u8; ml_dsa_65::PK_LEN] = stored_pk
+				.as_slice()
+				.try_into()
+				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
+
+			let pk = ml_dsa_65::PublicKey::try_from_bytes(*pk_bytes)
+				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
+
+			// Convert signature bytes (ML-DSA-65 signature size is 3309 bytes)
+			let sig_bytes: &[u8; ml_dsa_65::SIG_LEN] = signature
+				.as_slice()
+				.try_into()
+				.map_err(|_| Error::<T>::InvalidPqSignature)?;
+
+			// Verify post-quantum signature on-chain (using empty domain separation context b"")
+			ensure!(pk.verify(message.as_slice(), sig_bytes, b""), Error::<T>::PqVerificationFailed);
+
+			// Increment total verified count
+			let new_count = VerifiedPqCount::<T>::get()
+				.checked_add(1)
+				.ok_or(Error::<T>::StorageOverflow)?;
+			VerifiedPqCount::<T>::put(new_count);
+
+			Self::deposit_event(Event::PqSignatureVerified {
+				who,
+				verified_count: new_count,
+			});
+
+			Ok(())
 		}
 	}
 }

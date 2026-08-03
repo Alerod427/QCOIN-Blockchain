@@ -2674,6 +2674,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "fips204"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9fb5a367b9846933e271a3c2a992930743f82ae5e8cb7faa780715a80fa0b15"
+dependencies = [
+ "rand_core 0.6.4",
+ "sha2 0.10.9",
+ "sha3",
+ "zeroize",
+]
+
+[[package]]
 name = "fixed-hash"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5947,6 +5959,7 @@ dependencies = [
 name = "pallet-template"
 version = "0.1.0"
 dependencies = [
+ "fips204",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -9460,6 +9473,7 @@ dependencies = [
 name = "solochain-template-runtime"
 version = "0.1.0"
 dependencies = [
+ "fips204",
  "frame-benchmarking",
  "frame-executive",
  "frame-metadata-hash-extension",

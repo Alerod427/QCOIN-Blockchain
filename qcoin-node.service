@@ -1,0 +1,20 @@
+[Unit]
+Description=QCOIN Post-Quantum Blockchain Mainnet Node
+After=network.target
+
+[Service]
+Type=simple
+User=alerod
+WorkingDirectory=/home/alerod/Escritorio/qcoin-node
+ExecStart=/home/alerod/Escritorio/qcoin-node/target/release/solochain-template-node \
+  --chain /home/alerod/Escritorio/qcoin-node/qcoin_mainnet_spec.json \
+  --alice \
+  --validator \
+  --rpc-external \
+  --rpc-cors all \
+  --name "QCOIN-Validator-01"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
