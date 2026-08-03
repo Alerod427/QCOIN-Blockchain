@@ -54,5 +54,19 @@ Transaction fees on the QCOIN network are calculated dynamically based on three 
 - **80% of Transaction Fees**: Automatically **burned** to create a deflationary pressure proportional to network usage.
 - **20% of Transaction Fees**: Sent to the **Treasury Account** to support long-term development.
 
-### 3. Existential Deposit
+### 3. Block Mining Rewards & Halving Schedule (`pallet-template`)
+To incentivize validator node operators 24/7, QCOIN implements an on-chain **Block Mining Reward & Halving Schedule**:
+
+| Era / Period | Block Range | Reward per Block | Annual Minting Target | Halving Milestone |
+| :--- | :--- | :--- | :--- | :--- |
+| **Era 1 (Year 1)** | Blocks `1` to `5,000,000` | **10 QCOIN** | ~50,000,000 QCOIN | Network Launch |
+| **Era 2 (Year 2)** | Blocks `5,000,001` to `10,000,000` | **5 QCOIN** | ~25,000,000 QCOIN | **Halving 1 (50% reduction)** |
+| **Era 3 (Year 3)** | Blocks `10,000,001` to `15,000,000` | **2.5 QCOIN** | ~12,500,000 QCOIN | **Halving 2 (50% reduction)** |
+| **Era 4+ (Year 4+)** | Blocks `15,000,001+` | **1.25 QCOIN** | ~6,250,000 QCOIN | **Halving 3 (Final Floor)** |
+
+- **Validator Incentives**: Each validator claiming block rewards receives native QCOIN deposited directly into their SubWallet account.
+- **Deflationary Transition**: As transaction volume grows, gas fee rewards gradually exceed block mining rewards, transitioning the network smoothly into a self-sustaining transaction fee economy.
+
+### 4. Existential Deposit
 Accounts must maintain a minimum balance of **1 QCOIN** (`10^12 Plancks`). If an account balance falls below this limit, the account is reaped from storage to keep state size lean.
+

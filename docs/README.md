@@ -9,7 +9,7 @@ Welcome to the official documentation directory for **QCOIN**, a Post-Quantum La
 1. [🪙 QCOIN Tokenomics & Monetary Policy](QCOIN_TOKENOMICS.md)
    - Initial Genesis Supply (1,000,000,000 QCOIN)
    - Token Decimals (12 Decimals / Plancks)
-   - Genesis Distribution & Vesting Schedule
+   - On-Chain Block Mining Rewards & Halving Schedule (10 -> 5 -> 2.5 QCOIN)
    - Dynamic Transaction Fee Model & Deflationary Burning Mechanism
 
 2. [🛡️ Post-Quantum Security Architecture](POST_QUANTUM_SECURITY.md)

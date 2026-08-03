@@ -86,7 +86,7 @@ pub mod pallet {
 		type WeightInfo: WeightInfo;
 	}
 
-	/// A storage item for this pallet.
+	/// Storage item for this pallet.
 	#[pallet::storage]
 	pub type Something<T> = StorageValue<_, u32>;
 
@@ -103,6 +103,10 @@ pub mod pallet {
 	/// Counter for total post-quantum signatures verified on-chain.
 	#[pallet::storage]
 	pub type VerifiedPqCount<T> = StorageValue<_, u32, ValueQuery>;
+
+	/// Storage for total cumulative block rewards minted by the network.
+	#[pallet::storage]
+	pub type TotalBlockRewardsMinted<T> = StorageValue<_, u128, ValueQuery>;
 
 	/// Events that functions in this pallet can emit.
 	#[pallet::event]
@@ -121,6 +125,13 @@ pub mod pallet {
 		PqSignatureVerified {
 			who: T::AccountId,
 			verified_count: u32,
+		},
+		/// A block mining reward was minted and distributed with Halving schedule.
+		BlockRewardDistributed {
+			block_number: u32,
+			reward_amount: u128,
+			era: u32,
+			recipient: T::AccountId,
 		},
 	}
 
@@ -253,6 +264,54 @@ pub mod pallet {
 			});
 
 			Ok(())
+		}
+
+		/// Claim block reward with Halving Schedule for active validator node.
+		#[pallet::call_index(4)]
+		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		pub fn claim_block_reward(origin: OriginFor<T>) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			let current_block = <frame_system::Pallet<T>>::block_number();
+			let block_num: u32 = TryInto::<u32>::try_into(current_block).unwrap_or(1);
+
+			// Calculate block reward & current era
+			let (reward_amount, era) = Self::calculate_block_reward(block_num);
+
+			// Update total rewards storage
+			let new_total = TotalBlockRewardsMinted::<T>::get()
+				.saturating_add(reward_amount);
+			TotalBlockRewardsMinted::<T>::put(new_total);
+
+			// Emit block reward distribution event
+			Self::deposit_event(Event::BlockRewardDistributed {
+				block_number: block_num,
+				reward_amount,
+				era,
+				recipient: who,
+			});
+
+			Ok(())
+		}
+	}
+
+	impl<T: Config> Pallet<T> {
+		/// Calculates the block reward and era based on current block height and Halving schedule.
+		///
+		/// - Era 1 (Blocks 1 - 5,000,000): 10 QCOIN (10,000,000,000,000 Plancks)
+		/// - Era 2 (Blocks 5,000,001 - 10,000,000): 5 QCOIN (5,000,000,000,000 Plancks) [Halving 1]
+		/// - Era 3 (Blocks 10,000,001 - 15,000,000): 2.5 QCOIN (2,500,000,000,000 Plancks) [Halving 2]
+		/// - Era 4+ (Blocks 15,000,001+): 1.25 QCOIN (1,250,000,000,000 Plancks) [Halving 3]
+		pub fn calculate_block_reward(block_number: u32) -> (u128, u32) {
+			const UNIT: u128 = 1_000_000_000_000;
+			if block_number <= 5_000_000 {
+				(10 * UNIT, 1)
+			} else if block_number <= 10_000_000 {
+				(5 * UNIT, 2)
+			} else if block_number <= 15_000_000 {
+				(2_500_000_000_000, 3)
+			} else {
+				(1_250_000_000_000, 4)
+			}
 		}
 	}
 }
