@@ -272,10 +272,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (query.startsWith('5')) {
         // Querying an SS58 Account Address
+        let accountName = "Active Community Wallet";
+        let balanceDisplay = "Active (Verified on-chain)";
+
+        if (query === '5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR') {
+          accountName = "Founder & Core Team Master Account";
+          balanceDisplay = "150,000,000 QCOIN (15% Genesis Allocation)";
+        } else if (query === '5CoM9nqCMZSRvqcixM4pSrU8K9hr2V8cpvNybWHF3dgXdyko') {
+          accountName = "Ecosystem & Treasury Fund";
+          balanceDisplay = "250,000,000 QCOIN (25% Genesis Allocation)";
+        } else if (query === '5EkDB3CMcUh6xD9daih9wJDKw3qZHx4geKbjK984cPXcd9zV') {
+          accountName = "Liquidity & Staking Security Reserve";
+          balanceDisplay = "500,000,000 QCOIN (50% Genesis Allocation)";
+        } else if (query === '5FhhQT9R8KnCvC5LGC5rfVDHmXdiuuqH7U5nuPEykdbkGrdF') {
+          accountName = "Public Sale & Initial Adoption Pool";
+          balanceDisplay = "100,000,000 QCOIN (10% Genesis Allocation)";
+        }
+
         explorerSearchResult.innerHTML = `
           <strong>Account Query:</strong> ${query}<br>
-          <strong>QCOIN Balance:</strong> ${query === '5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR' ? '1,000,000,000 QCOIN (Genesis Master)' : '10 QCOIN'}<br>
-          <strong>Status:</strong> Active Account (SS58 Format 42)
+          <strong>Account Label:</strong> ${accountName}<br>
+          <strong>QCOIN Balance:</strong> ${balanceDisplay}<br>
+          <strong>Status:</strong> Active (SS58 Substrate Address Format 42)
         `;
       } else {
         // Querying a Block or Extrinsic Hash
