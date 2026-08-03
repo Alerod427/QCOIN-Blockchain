@@ -35,10 +35,10 @@ The initial supply of **1,000,000,000 QCOIN** is allocated as follows:
 +-----------------------------------------------------------+
 ```
 
-1. **50% (500,000,000 QCOIN) - Post-Quantum Security Reserve**: Allocated for future staking rewards, validator incentives, and migration pools.
-2. **25% (250,000,000 QCOIN) - Ecosystem & Treasury**: Managed by on-chain governance for grants, dApp incentives, and audit funds.
-3. **15% (150,000,000 QCOIN) - Core Development & Foundation**: Vested over 48 months with a 12-month cliff for core protocol engineers.
-4. **10% (100,000,000 QCOIN) - Initial Genesis Circulation**: Distributed to initial genesis accounts (Alice, Bob, Charlie, Dave, Eve, Ferdie and Stashes) with `1u128 << 60` units (~1.15 M QCOIN each) for local network testing and deployment.
+1. **50% (500,000,000 QCOIN) - Liquidity & Staking Security Reserve**: Account `5FFPfVjtxQNqM1yC8e5c9M4j8mXXxmTLAqxhNGKBtFUiK6NF`. Allocated for DEX liquidity pools, validator staking incentives, and network migration.
+2. **25% (250,000,000 QCOIN) - Ecosystem & Treasury Fund**: Account `5CPGEyYKcFqCGM1w9EQ19JPxpuRwheEjqPjgWAVf1fxL7Fh4`. Managed for developer grants, exchange listing fees, security audits, and marketing.
+3. **15% (150,000,000 QCOIN) - Founder & Core Team Account**: Account `5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR`. Founder master cold wallet for core protocol engineering and project leadership.
+4. **10% (100,000,000 QCOIN) - Public Sale & Initial Adoption**: Account `5Di2JXEJrVYcFM7shMi6tsHwFQAFQrtdyC7oJd6QVMDTmQHt`. Allocated for public sale, early adopters, and community airdrops.
 
 ---
 

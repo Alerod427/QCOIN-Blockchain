@@ -25,7 +25,19 @@
           "balances": [
             [
               "5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR",
-              1000000000000000000000
+              150000000000000000000
+            ],
+            [
+              "5CPGEyYKcFqCGM1w9EQ19JPxpuRwheEjqPjgWAVf1fxL7Fh4",
+              250000000000000000000
+            ],
+            [
+              "5FFPfVjtxQNqM1yC8e5c9M4j8mXXxmTLAqxhNGKBtFUiK6NF",
+              500000000000000000000
+            ],
+            [
+              "5Di2JXEJrVYcFM7shMi6tsHwFQAFQrtdyC7oJd6QVMDTmQHt",
+              100000000000000000000
             ]
           ]
         },
