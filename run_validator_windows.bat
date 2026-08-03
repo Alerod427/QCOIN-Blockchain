@@ -40,7 +40,7 @@ if %errorlevel% neq 0 (
 )
 
 :: Start container in background and immediately attach interactive live log stream
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --chain /qcoin/qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
 
 echo.
 echo ==============================================================================
