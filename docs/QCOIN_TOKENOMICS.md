@@ -35,10 +35,10 @@ The initial supply of **1,000,000,000 QCOIN** is allocated as follows:
 +-----------------------------------------------------------+
 ```
 
-1. **50% (500,000,000 QCOIN) - Liquidity & Staking Security Reserve**: Account `5FFPfVjtxQNqM1yC8e5c9M4j8mXXxmTLAqxhNGKBtFUiK6NF`. Allocated for DEX liquidity pools, validator staking incentives, and network migration.
-2. **25% (250,000,000 QCOIN) - Ecosystem & Treasury Fund**: Account `5CPGEyYKcFqCGM1w9EQ19JPxpuRwheEjqPjgWAVf1fxL7Fh4`. Managed for developer grants, exchange listing fees, security audits, and marketing.
+1. **50% (500,000,000 QCOIN) - Liquidity & Staking Security Reserve**: Account `5EkDB3CMcUh6xD9daih9wJDKw3qZHx4geKbjK984cPXcd9zV`. Allocated for DEX liquidity pools, validator staking incentives, and network migration.
+2. **25% (250,000,000 QCOIN) - Ecosystem & Treasury Fund**: Account `5CoM9nqCMZSRvqcixM4pSrU8K9hr2V8cpvNybWHF3dgXdyko`. Managed for developer grants, exchange listing fees, security audits, and marketing.
 3. **15% (150,000,000 QCOIN) - Founder & Core Team Account**: Account `5HZ5B8jxiP8kgjQVhC4PRCz1F2ebM7uqtwCcQavgC1hBiDpR`. Founder master cold wallet for core protocol engineering and project leadership.
-4. **10% (100,000,000 QCOIN) - Public Sale & Initial Adoption**: Account `5Di2JXEJrVYcFM7shMi6tsHwFQAFQrtdyC7oJd6QVMDTmQHt`. Allocated for public sale, early adopters, and community airdrops.
+4. **10% (100,000,000 QCOIN) - Public Sale & Initial Adoption**: Account `5FhhQT9R8KnCvC5LGC5rfVDHmXdiuuqH7U5nuPEykdbkGrdF`. Allocated for public sale, early adopters, and community airdrops.
 
 ---
 
