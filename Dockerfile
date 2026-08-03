@@ -9,6 +9,7 @@ RUN cargo build --locked --release
 FROM docker.io/parity/base-bin:latest
 
 COPY --from=builder /polkadot/target/release/solochain-template-node /usr/local/bin
+COPY --from=builder /polkadot/qcoin_mainnet_spec.json /usr/local/bin/qcoin_mainnet_spec.json
 
 USER root
 RUN useradd -m -u 1001 -U -s /bin/sh -d /polkadot polkadot && \
