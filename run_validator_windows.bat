@@ -39,11 +39,9 @@ if %errorlevel% neq 0 (
     docker build -t qcoin-node:latest .
 )
 
-:: Prepare data directories and generate network key if missing
-docker run --rm -v qcoin_data:/data --entrypoint /bin/sh qcoin-node:latest -c "mkdir -p /data/chains/qcoin_mainnet/network && if [ ! -f /data/chains/qcoin_mainnet/network/secret_ed25519 ]; then /usr/local/bin/solochain-template-node key generate-node-key --file /data/chains/qcoin_mainnet/network/secret_ed25519 2>/dev/null; fi"
-
-:: Start container in background and immediately attach interactive live log stream
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
+:: Start container with inline node key (no file needed)
+:: Each validator operator should replace this key with their own unique 64-char hex string
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
 
 echo.
 echo ==============================================================================
