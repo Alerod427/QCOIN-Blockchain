@@ -108,6 +108,16 @@ pub mod pallet {
 	#[pallet::storage]
 	pub type TotalBlockRewardsMinted<T> = StorageValue<_, u128, ValueQuery>;
 
+	/// Storage for approved network validator accounts.
+	#[pallet::storage]
+	pub type ApprovedValidators<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		bool,
+		ValueQuery,
+	>;
+
 	/// Events that functions in this pallet can emit.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -132,6 +142,15 @@ pub mod pallet {
 			reward_amount: u128,
 			era: u32,
 			recipient: T::AccountId,
+		},
+		/// A new validator node was approved by Sudo master key.
+		ValidatorApproved {
+			who: T::AccountId,
+			session_key: BoundedVec<u8, ConstU32<64>>,
+		},
+		/// A validator node authorization was revoked by Sudo master key.
+		ValidatorRevoked {
+			who: T::AccountId,
 		},
 	}
 
@@ -288,6 +307,44 @@ pub mod pallet {
 				reward_amount,
 				era,
 				recipient: who,
+			});
+
+			Ok(())
+		}
+
+		/// Approve a new validator node by Sudo Master Key.
+		#[pallet::call_index(5)]
+		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		pub fn add_validator(
+			origin: OriginFor<T>,
+			validator: T::AccountId,
+			session_key: BoundedVec<u8, ConstU32<64>>,
+		) -> DispatchResult {
+			ensure_root(origin)?;
+
+			ApprovedValidators::<T>::insert(&validator, true);
+
+			Self::deposit_event(Event::ValidatorApproved {
+				who: validator,
+				session_key,
+			});
+
+			Ok(())
+		}
+
+		/// Revoke validator node approval by Sudo Master Key.
+		#[pallet::call_index(6)]
+		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		pub fn remove_validator(
+			origin: OriginFor<T>,
+			validator: T::AccountId,
+		) -> DispatchResult {
+			ensure_root(origin)?;
+
+			ApprovedValidators::<T>::remove(&validator);
+
+			Self::deposit_event(Event::ValidatorRevoked {
+				who: validator,
 			});
 
 			Ok(())
