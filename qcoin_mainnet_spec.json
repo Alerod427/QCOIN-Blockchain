@@ -3,7 +3,7 @@
   "id": "qcoin_mainnet",
   "chainType": "Live",
   "bootNodes": [
-    "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWH21QSYqignLfzpjksJGUF3S4UfoRYVMgR2QHZf9xh9TN"
+    "/ip4/158.179.211.45/tcp/30333/p2p/12D3KooWNW4RANoLNxngqwk2FQiST4TNLXwg35fevpeuA6CFhfoY"
   ],
   "telemetryEndpoints": null,
   "protocolId": null,
