@@ -52,7 +52,7 @@ if %errorlevel% neq 0 (
 
 :: Start container with inline node key and external RPC access
 :: Each validator operator should replace this key with their own unique 64-char hex string
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data_v109:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWEeYxRwjWao8QyS8hkQcT41Xt3pRe2Kx3ScmjTdSMaJk8
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data_v109:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
 
 if not "%REWARD_WALLET%"=="" (
     echo [INFO] Vinculando cartera %REWARD_WALLET% en la blockchain...
@@ -77,7 +77,7 @@ goto END
 :USE_EXE
 echo [OK] Native Windows binary detected!
 echo 🚀 Starting QCOIN Validator Node in LIVE CONSOLE MODE...
-solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWEeYxRwjWao8QyS8hkQcT41Xt3pRe2Kx3ScmjTdSMaJk8
+solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
 goto END
 
 :NO_ENV

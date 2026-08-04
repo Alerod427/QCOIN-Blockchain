@@ -30,7 +30,7 @@ sleep 3
 echo "🚀 [2/4] Starting QCOIN Mainnet Blockchain Node..."
 cd "${PROJECT_DIR}"
 nohup setsid ./target/release/solochain-template-node \
-  --base-path "${PROJECT_DIR}/data_v109" \
+  --base-path "${PROJECT_DIR}/data_v110" \
   --chain "${PROJECT_DIR}/qcoin_mainnet_spec.json" \
   --alice \
   --validator \
