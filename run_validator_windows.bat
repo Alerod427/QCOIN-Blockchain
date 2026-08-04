@@ -41,7 +41,7 @@ if %errorlevel% neq 0 (
 
 :: Start container with inline node key and external RPC access
 :: Each validator operator should replace this key with their own unique 64-char hex string
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/Error: Io(Os { code: 2, kind: NotFound, message: "No such file or directory" })
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWD8bHq44CGuyF9EZbxacQBVwSJNmK77495KpNtMrKoDLY
 
 echo.
 echo ==============================================================================
@@ -60,7 +60,7 @@ goto END
 :USE_EXE
 echo [OK] Native Windows binary detected!
 echo 🚀 Starting QCOIN Validator Node in LIVE CONSOLE MODE...
-solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/Error: Io(Os { code: 2, kind: NotFound, message: "No such file or directory" })
+solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWD8bHq44CGuyF9EZbxacQBVwSJNmK77495KpNtMrKoDLY
 goto END
 
 :NO_ENV
