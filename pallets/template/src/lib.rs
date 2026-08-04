@@ -349,6 +349,26 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		/// Register self as an approved validator node by providing the node's local Session Key.
+		/// The caller's signed AccountId (`who`) is mapped as the reward recipient wallet for this validator node.
+		#[pallet::call_index(7)]
+		#[pallet::weight(T::WeightInfo::register_validator())]
+		pub fn register_validator(
+			origin: OriginFor<T>,
+			session_key: BoundedVec<u8, ConstU32<64>>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			ApprovedValidators::<T>::insert(&who, true);
+
+			Self::deposit_event(Event::ValidatorApproved {
+				who: who.clone(),
+				session_key,
+			});
+
+			Ok(())
+		}
 	}
 
 	impl<T: Config> Pallet<T> {
