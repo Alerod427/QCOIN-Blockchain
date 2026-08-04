@@ -66,6 +66,7 @@ pub mod pallet {
 	// Import various useful types required by all FRAME pallets.
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::Currency;
 	use frame_system::pallet_prelude::*;
 
 	// Import post-quantum FIPS 204 primitives.
@@ -84,6 +85,8 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: WeightInfo;
+		/// The currency mechanism for minting block rewards.
+		type Currency: Currency<Self::AccountId>;
 	}
 
 	/// Storage item for this pallet.
@@ -116,6 +119,17 @@ pub mod pallet {
 		T::AccountId,
 		bool,
 		ValueQuery,
+	>;
+
+	/// Storage mapping each validator to their chosen reward wallet address.
+	/// If not set, rewards go to the validator's own account.
+	#[pallet::storage]
+	pub type RewardWallets<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		T::AccountId,
+		OptionQuery,
 	>;
 
 	/// Events that functions in this pallet can emit.
@@ -169,6 +183,8 @@ pub mod pallet {
 		PqVerificationFailed,
 		/// No Post-Quantum public key found for the account.
 		PqKeyNotFound,
+		/// Caller is not a registered/approved validator.
+		NotApprovedValidator,
 	}
 
 	/// The pallet's dispatchable functions ([`Call`]s).
@@ -286,15 +302,29 @@ pub mod pallet {
 		}
 
 		/// Claim block reward with Halving Schedule for active validator node.
+		/// Rewards are minted and deposited into the validator's chosen reward wallet.
+		/// If no reward wallet is configured, rewards go to the caller's own account.
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::claim_block_reward())]
 		pub fn claim_block_reward(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+
+			// Verify the caller is an approved validator
+			ensure!(ApprovedValidators::<T>::get(&who), Error::<T>::NotApprovedValidator);
+
 			let current_block = <frame_system::Pallet<T>>::block_number();
 			let block_num: u32 = TryInto::<u32>::try_into(current_block).unwrap_or(1);
 
 			// Calculate block reward & current era
 			let (reward_amount, era) = Self::calculate_block_reward(block_num);
+
+			// Determine the reward recipient: custom wallet or validator's own account
+			let recipient = RewardWallets::<T>::get(&who).unwrap_or(who.clone());
+
+			// Mint the reward coins and deposit them into the recipient's account
+			let amount = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount)
+				.map_err(|_| Error::<T>::StorageOverflow)?;
+			let _imbalance = T::Currency::deposit_creating(&recipient, amount);
 
 			// Update total rewards storage
 			let new_total = TotalBlockRewardsMinted::<T>::get()
@@ -306,7 +336,7 @@ pub mod pallet {
 				block_number: block_num,
 				reward_amount,
 				era,
-				recipient: who,
+				recipient,
 			});
 
 			Ok(())
@@ -352,20 +382,45 @@ pub mod pallet {
 
 		/// Register self as an approved validator node by providing the node's local Session Key.
 		/// The caller's signed AccountId (`who`) is mapped as the reward recipient wallet for this validator node.
+		/// Optionally specify a different reward_wallet to receive block mining rewards.
 		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::register_validator())]
 		pub fn register_validator(
 			origin: OriginFor<T>,
 			session_key: BoundedVec<u8, ConstU32<64>>,
+			reward_wallet: Option<T::AccountId>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
 			ApprovedValidators::<T>::insert(&who, true);
 
+			// If the user specified a custom reward wallet, store it
+			if let Some(ref wallet) = reward_wallet {
+				RewardWallets::<T>::insert(&who, wallet);
+			}
+
 			Self::deposit_event(Event::ValidatorApproved {
 				who: who.clone(),
 				session_key,
 			});
+
+			Ok(())
+		}
+
+		/// Change the reward wallet address for an already-registered validator.
+		/// The caller must be an approved validator. Rewards from future claims will go to the new wallet.
+		#[pallet::call_index(8)]
+		#[pallet::weight(T::WeightInfo::register_validator())]
+		pub fn set_reward_wallet(
+			origin: OriginFor<T>,
+			new_wallet: T::AccountId,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			// Only approved validators can change their reward wallet
+			ensure!(ApprovedValidators::<T>::get(&who), Error::<T>::NotApprovedValidator);
+
+			RewardWallets::<T>::insert(&who, &new_wallet);
 
 			Ok(())
 		}
