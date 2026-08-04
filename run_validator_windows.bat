@@ -54,6 +54,12 @@ if %errorlevel% neq 0 (
 :: Each validator operator should replace this key with their own unique 64-char hex string
 docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWEeYxRwjWao8QyS8hkQcT41Xt3pRe2Kx3ScmjTdSMaJk8
 
+if not "%REWARD_WALLET%"=="" (
+    echo [INFO] Vinculando cartera %REWARD_WALLET% en la blockchain...
+    timeout /t 5 >nul
+    docker exec qcoin-validator python3 -c "from substrateinterface import SubstrateInterface, Keypair; sub=SubstrateInterface(url='ws://127.0.0.1:9944'); key=Keypair.create_from_seed('0x8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193', ss58_format=42); call=sub.compose_call('Template', 'set_reward_wallet', {'new_wallet': '%REWARD_WALLET%'}); receipt=sub.submit_extrinsic(sub.create_signed_extrinsic(call=call, keypair=key), wait_for_inclusion=True); print('✅ RECOMPENSAS VINCULADAS CON EXITO A:', '%REWARD_WALLET%') if receipt.is_success else print('❌ Error al vincular cartera')" >nul 2>&1
+)
+
 echo.
 echo ==============================================================================
 echo    🟢 LIVE VALIDATOR NODE LOGS (Press Ctrl+C to disconnect view)
