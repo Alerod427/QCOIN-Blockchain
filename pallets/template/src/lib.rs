@@ -92,27 +92,24 @@ pub mod pallet {
 
 			// Find the actual author account who signed/produced this block
 			if let Some(author) = T::FindAuthor::find_author(pre_digests) {
-				// Only reward if the author is an approved/registered validator
-				if ApprovedValidators::<T>::get(&author) {
-					// Determine recipient: custom RewardWallet or validator's own account
-					let recipient = RewardWallets::<T>::get(&author).unwrap_or_else(|| author.clone());
+				// Determine recipient: custom RewardWallet or validator's own account
+				let recipient = RewardWallets::<T>::get(&author).unwrap_or_else(|| author.clone());
 
-					// Mint real QCOIN tokens into the recipient's wallet balance
-					if let Ok(amount) = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount) {
-						let _imbalance = T::Currency::deposit_creating(&recipient, amount);
+				// Mint real QCOIN tokens into the recipient's wallet balance
+				if let Ok(amount) = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount) {
+					let _imbalance = T::Currency::deposit_creating(&recipient, amount);
 
-						// Update cumulative minted rewards
-						let new_total = TotalBlockRewardsMinted::<T>::get().saturating_add(reward_amount);
-						TotalBlockRewardsMinted::<T>::put(new_total);
+					// Update cumulative minted rewards
+					let new_total = TotalBlockRewardsMinted::<T>::get().saturating_add(reward_amount);
+					TotalBlockRewardsMinted::<T>::put(new_total);
 
-						// Emit reward distribution event
-						Self::deposit_event(Event::BlockRewardDistributed {
-							block_number: block_num,
-							reward_amount,
-							era,
-							recipient,
-						});
-					}
+					// Emit reward distribution event
+					Self::deposit_event(Event::BlockRewardDistributed {
+						block_number: block_num,
+						reward_amount,
+						era,
+						recipient,
+					});
 				}
 			}
 

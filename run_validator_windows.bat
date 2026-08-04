@@ -26,7 +26,18 @@ goto NO_ENV
 :USE_DOCKER
 echo [OK] Docker Desktop detected!
 echo.
-echo 🚀 Starting QCOIN Validator Node in LIVE CONSOLE MODE...
+echo ==============================================================================
+echo    💰 CONFIGURACION DE CARTERA DE RECOMPENSAS QCOIN
+echo ==============================================================================
+set /p REWARD_WALLET="Escribe o pega tu direccion de SubWallet (Enter para usar por defecto): "
+echo.
+if not "%REWARD_WALLET%"=="" (
+    echo [OK] Cartera asignada correctamente: %REWARD_WALLET%
+) else (
+    echo [OK] Usando cartera predeterminada del validador.
+)
+echo.
+echo 🚀 Iniciando Validador de QCOIN en Modo Consola en Vivo...
 echo.
 
 docker stop qcoin-validator >nul 2>&1
@@ -41,7 +52,7 @@ if %errorlevel% neq 0 (
 
 :: Start container with inline node key and external RPC access
 :: Each validator operator should replace this key with their own unique 64-char hex string
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWD8bHq44CGuyF9EZbxacQBVwSJNmK77495KpNtMrKoDLY
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWGVfgs9dCt98HxkJnEiQXXYqxFnokgHyXzPzFmrCtEUGW
 
 echo.
 echo ==============================================================================
@@ -60,7 +71,7 @@ goto END
 :USE_EXE
 echo [OK] Native Windows binary detected!
 echo 🚀 Starting QCOIN Validator Node in LIVE CONSOLE MODE...
-solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWD8bHq44CGuyF9EZbxacQBVwSJNmK77495KpNtMrKoDLY
+solochain-template-node.exe --chain qcoin_mainnet_spec.json --validator --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWGVfgs9dCt98HxkJnEiQXXYqxFnokgHyXzPzFmrCtEUGW
 goto END
 
 :NO_ENV
