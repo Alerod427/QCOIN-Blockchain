@@ -39,9 +39,9 @@ if %errorlevel% neq 0 (
     docker build -t qcoin-node:latest .
 )
 
-:: Start container with inline node key (no file needed)
+:: Start container with inline node key and external RPC access
 :: Each validator operator should replace this key with their own unique 64-char hex string
-docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
+docker run -d --name qcoin-validator -p 30333:30333 -p 9944:9944 -v qcoin_data:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWFgJgGEuBGfGpojUZv2bUavYhC5mgURuuL44T31m8cPFd
 
 echo.
 echo ==============================================================================
