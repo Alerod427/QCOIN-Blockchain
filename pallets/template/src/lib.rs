@@ -68,6 +68,7 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::Currency;
 	use frame_system::pallet_prelude::*;
+	use scale_info::prelude::vec::Vec;
 
 	// Import post-quantum FIPS 204 primitives.
 	use fips204::ml_dsa_65;
@@ -77,6 +78,49 @@ pub mod pallet {
 	// (`Call`s) in this pallet.
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		/// Automatically mints and distributes block rewards on every finalized block initialization.
+		/// Rewards are credited to approved active validator reward wallets.
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			let block_num: u32 = TryInto::<u32>::try_into(n).unwrap_or(1);
+			let (reward_amount, era) = Self::calculate_block_reward(block_num);
+
+			// Collect all active approved validator accounts
+			let approved: Vec<T::AccountId> = ApprovedValidators::<T>::iter()
+				.filter_map(|(acc, is_approved)| if is_approved { Some(acc) } else { None })
+				.collect();
+
+			if !approved.is_empty() {
+				// Round-robin validator selection based on block number
+				let index = (block_num as usize) % approved.len();
+				let validator = &approved[index];
+
+				// Determine recipient: custom RewardWallet or validator's own account
+				let recipient = RewardWallets::<T>::get(validator).unwrap_or_else(|| validator.clone());
+
+				// Mint real QCOIN tokens into the recipient's wallet balance
+				if let Ok(amount) = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount) {
+					let _imbalance = T::Currency::deposit_creating(&recipient, amount);
+
+					// Update cumulative minted rewards
+					let new_total = TotalBlockRewardsMinted::<T>::get().saturating_add(reward_amount);
+					TotalBlockRewardsMinted::<T>::put(new_total);
+
+					// Emit reward distribution event
+					Self::deposit_event(Event::BlockRewardDistributed {
+						block_number: block_num,
+						reward_amount,
+						era,
+						recipient,
+					});
+				}
+			}
+
+			T::DbWeight::get().reads_writes(3, 2)
+		}
+	}
 
 	/// The pallet's configuration trait.
 	#[pallet::config]
