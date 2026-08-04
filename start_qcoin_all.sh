@@ -25,24 +25,26 @@ echo "⏳ [1/4] Stopping any previous services..."
 pkill -9 -f "solochain-template-node" 2>/dev/null || true
 pkill -9 -f "cloudflared" 2>/dev/null || true
 pkill -9 -f "http.server 8080" 2>/dev/null || true
-sleep 1
+sleep 3
 
 echo "🚀 [2/4] Starting QCOIN Mainnet Blockchain Node..."
 cd "${PROJECT_DIR}"
-./target/release/solochain-template-node \
+nohup setsid ./target/release/solochain-template-node \
+  --base-path "${PROJECT_DIR}/data_v103" \
   --chain "${PROJECT_DIR}/qcoin_mainnet_spec.json" \
   --alice \
   --validator \
   --force-authoring \
   --unsafe-rpc-external \
   --rpc-cors all \
+  --rpc-methods unsafe \
   --rpc-port 9944 \
   > "${LOGS_DIR}/node.log" 2>&1 &
 NODE_PID=$!
-sleep 2
+sleep 3
 
 echo "🔒 [3/4] Starting Cloudflare SSL WSS Tunnel..."
-/tmp/cloudflared tunnel --url http://127.0.0.1:9944 > "${LOGS_DIR}/cloudflared.log" 2>&1 &
+nohup setsid /tmp/cloudflared tunnel --url http://127.0.0.1:9944 > "${LOGS_DIR}/cloudflared.log" 2>&1 &
 TUNNEL_PID=$!
 sleep 5
 

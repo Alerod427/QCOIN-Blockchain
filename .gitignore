@@ -1,3 +1,5 @@
 target/
 logs/
 dapp/active_wss_url.txt
+data/
+data_*/

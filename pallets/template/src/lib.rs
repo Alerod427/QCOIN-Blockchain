@@ -287,7 +287,7 @@ pub mod pallet {
 
 		/// Claim block reward with Halving Schedule for active validator node.
 		#[pallet::call_index(4)]
-		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		#[pallet::weight(T::WeightInfo::claim_block_reward())]
 		pub fn claim_block_reward(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let current_block = <frame_system::Pallet<T>>::block_number();
@@ -314,7 +314,7 @@ pub mod pallet {
 
 		/// Approve a new validator node by Sudo Master Key.
 		#[pallet::call_index(5)]
-		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		#[pallet::weight(T::WeightInfo::add_validator())]
 		pub fn add_validator(
 			origin: OriginFor<T>,
 			validator: T::AccountId,
@@ -334,7 +334,7 @@ pub mod pallet {
 
 		/// Revoke validator node approval by Sudo Master Key.
 		#[pallet::call_index(6)]
-		#[pallet::weight(Weight::from_parts(10_000_000, 0))]
+		#[pallet::weight(T::WeightInfo::remove_validator())]
 		pub fn remove_validator(
 			origin: OriginFor<T>,
 			validator: T::AccountId,

@@ -38,6 +38,9 @@ pub trait WeightInfo {
 	fn cause_error() -> Weight;
 	fn register_pq_public_key() -> Weight;
 	fn verify_pq_signature() -> Weight;
+	fn claim_block_reward() -> Weight;
+	fn add_validator() -> Weight;
+	fn remove_validator() -> Weight;
 }
 
 /// Weights for pallet_template using the Substrate node and recommended hardware.
@@ -73,6 +76,18 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
+	fn claim_block_reward() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	fn add_validator() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	fn remove_validator() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 }
 
 // For backwards compatibility and tests
@@ -105,6 +120,18 @@ impl WeightInfo for () {
 	fn verify_pq_signature() -> Weight {
 		Weight::from_parts(50_000_000, 4000)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn claim_block_reward() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn add_validator() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn remove_validator() -> Weight {
+		Weight::from_parts(10_000_000, 1000)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 }
