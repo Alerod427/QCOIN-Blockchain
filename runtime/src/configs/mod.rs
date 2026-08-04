@@ -23,7 +23,7 @@
 //
 // For more information, please refer to <http://unlicense.org>
 
-// Substrate and Polkadot dependencies
+use codec::Decode;
 use frame_support::{
 	derive_impl, parameter_types,
 	traits::{ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, VariantCountOf},
@@ -157,9 +157,36 @@ impl pallet_sudo::Config for Runtime {
 	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
+pub struct AuraAuthorFinder;
+impl frame_support::traits::FindAuthor<AccountId> for AuraAuthorFinder {
+	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+	where
+		I: 'a + IntoIterator<Item = (frame_support::ConsensusEngineId, &'a [u8])>,
+	{
+		for (id, mut data) in digests {
+			if id == sp_consensus_aura::AURA_ENGINE_ID {
+				if let Ok(slot) = sp_consensus_aura::Slot::decode(&mut data) {
+					let authorities = pallet_aura::Authorities::<Runtime>::get();
+					if !authorities.is_empty() {
+						let slot_num: u64 = u64::from(slot);
+						let idx = (slot_num % (authorities.len() as u64)) as usize;
+						let aura_id = &authorities[idx];
+						let raw_slice: &[u8] = aura_id.as_ref();
+						if let Ok(raw_bytes) = <[u8; 32]>::try_from(raw_slice) {
+							return Some(AccountId::from(raw_bytes));
+						}
+					}
+				}
+			}
+		}
+		None
+	}
+}
+
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 	type Currency = Balances;
+	type FindAuthor = AuraAuthorFinder;
 }
