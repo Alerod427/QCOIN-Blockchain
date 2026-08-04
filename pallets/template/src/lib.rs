@@ -448,18 +448,15 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Change the reward wallet address for an already-registered validator.
-		/// The caller must be an approved validator. Rewards from future claims will go to the new wallet.
+		/// Change the reward wallet address for a validator node.
+		/// Rewards from future mined blocks will go to the new wallet. This transaction is fee-free.
 		#[pallet::call_index(8)]
-		#[pallet::weight(T::WeightInfo::register_validator())]
+		#[pallet::weight((T::WeightInfo::register_validator(), DispatchClass::Normal, Pays::No))]
 		pub fn set_reward_wallet(
 			origin: OriginFor<T>,
 			new_wallet: T::AccountId,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-
-			// Only approved validators can change their reward wallet
-			ensure!(ApprovedValidators::<T>::get(&who), Error::<T>::NotApprovedValidator);
 
 			RewardWallets::<T>::insert(&who, &new_wallet);
 
