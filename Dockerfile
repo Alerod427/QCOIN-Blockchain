@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM rust:1.80-slim-bookworm AS builder
+FROM rust:slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     clang \
