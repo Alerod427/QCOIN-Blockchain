@@ -50,6 +50,12 @@ echo "🚀 Iniciando Validador de QCOIN en Modo Docker..."
 ${DOCKER_CMD} stop qcoin-validator >/dev/null 2>&1 || true
 ${DOCKER_CMD} rm qcoin-validator >/dev/null 2>&1 || true
 
+# Ensure release binary exists locally before building container
+if [ ! -f "target/release/solochain-template-node" ]; then
+    echo "[INFO] Compilando ejecutable nativo de QCOIN (cargo build --release)..."
+    cargo build --release
+fi
+
 # Build docker image if missing
 if ! ${DOCKER_CMD} image inspect qcoin-node:latest >/dev/null 2>&1; then
     echo "[INFO] Construyendo imagen Docker de QCOIN localmente..."
@@ -75,7 +81,7 @@ ${DOCKER_CMD} run -d --name qcoin-validator \
 if [ -n "${REWARD_WALLET}" ]; then
     echo "[INFO] Vinculando cartera ${REWARD_WALLET} en la blockchain..."
     sleep 5
-    ${DOCKER_CMD} exec qcoin-validator python3 -c "from substrateinterface import SubstrateInterface, Keypair; sub=SubstrateInterface(url='ws://127.0.0.1:9944'); key=Keypair.create_from_seed('0x8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193', ss58_format=42); call=sub.compose_call('Template', 'set_reward_wallet', {'new_wallet': '${REWARD_WALLET}'}); receipt=sub.submit_extrinsic(sub.create_signed_extrinsic(call=call, keypair=key), wait_for_inclusion=True); print('✅ RECOMPENSAS VINCULADAS CON EXITO A:', '${REWARD_WALLET}') if receipt.is_success else print('❌ Error al vincular cartera')" || true
+    python3 -c "from substrateinterface import SubstrateInterface, Keypair; sub=SubstrateInterface(url='ws://127.0.0.1:9944'); key=Keypair.create_from_seed('0x8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193', ss58_format=42); call=sub.compose_call('Template', 'set_reward_wallet', {'new_wallet': '${REWARD_WALLET}'}); receipt=sub.submit_extrinsic(sub.create_signed_extrinsic(call=call, keypair=key), wait_for_inclusion=True); print('✅ RECOMPENSAS VINCULADAS CON EXITO A:', '${REWARD_WALLET}') if receipt.is_success else print('❌ Error al vincular cartera')" 2>/dev/null || ${DOCKER_CMD} exec qcoin-validator python3 -c "from substrateinterface import SubstrateInterface, Keypair; sub=SubstrateInterface(url='ws://127.0.0.1:9944'); key=Keypair.create_from_seed('0x8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193', ss58_format=42); call=sub.compose_call('Template', 'set_reward_wallet', {'new_wallet': '${REWARD_WALLET}'}); receipt=sub.submit_extrinsic(sub.create_signed_extrinsic(call=call, keypair=key), wait_for_inclusion=True); print('✅ RECOMPENSAS VINCULADAS CON EXITO A:', '${REWARD_WALLET}') if receipt.is_success else print('❌ Error al vincular cartera')" || true
 fi
 
 echo ""

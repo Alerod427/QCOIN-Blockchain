@@ -1,0 +1,11 @@
+target/*
+!target/release/solochain-template-node
+data/
+data_v*/
+logs/
+.git/
+.cargo/
+dapp/
+scratch/
+*.log
+*.service
