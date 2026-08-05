@@ -3,67 +3,24 @@
 //! A pallet with minimal functionality to help developers understand the essential components of
 //! writing a FRAME pallet. It is typically used in beginner tutorials or in Substrate template
 //! nodes as a starting point for creating a new pallet and **not meant to be used in production**.
-//!
-//! ## Overview
-//!
-//! This template pallet contains basic examples of:
-//! - declaring a storage item that stores a single `u32` value
-//! - declaring and using events
-//! - declaring and using errors
-//! - a dispatchable function that allows a user to set a new value to storage and emits an event
-//!   upon success
-//! - another dispatchable function that causes a custom error to be thrown
-//!
-//! Each pallet section is annotated with an attribute using the `#[pallet::...]` procedural macro.
-//! This macro generates the necessary code for a pallet to be aggregated into a FRAME runtime.
-//!
-//! Learn more about FRAME macros [here](https://docs.substrate.io/reference/frame-macros/).
-//!
-//! ### Pallet Sections
-//!
-//! The pallet sections in this template are:
-//!
-//! - A **configuration trait** that defines the types and parameters which the pallet depends on
-//!   (denoted by the `#[pallet::config]` attribute). See: [`Config`].
-//! - A **means to store pallet-specific data** (denoted by the `#[pallet::storage]` attribute).
-//!   See: [`storage_types`].
-//! - A **declaration of the events** this pallet emits (denoted by the `#[pallet::event]`
-//!   attribute). See: [`Event`].
-//! - A **declaration of the errors** that this pallet can throw (denoted by the `#[pallet::error]`
-//!   attribute). See: [`Error`].
-//! - A **set of dispatchable functions** that define the pallet's functionality (denoted by the
-//!   `#[pallet::call]` attribute). See: [`dispatchables`].
-//!
-//! Run `cargo doc --package pallet-template --open` to view this pallet's documentation.
 
-// We make sure this pallet uses `no_std` for compiling to Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-// Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
 
-// FRAME pallets require their own "mock runtimes" to be able to run unit tests. This module
-// contains a mock runtime specific for testing this pallet's functionality.
 #[cfg(test)]
 mod mock;
 
-// This module contains the unit tests for this pallet.
-// Learn about pallet unit testing here: https://docs.substrate.io/test/unit-testing/
 #[cfg(test)]
 mod tests;
 
-// Every callable function or "dispatchable" a pallet exposes must have weight values that correctly
-// estimate a dispatchable's execution time. The benchmarking module is used to calculate weights
-// for each dispatchable and generates this pallet's weight.rs file. Learn more about benchmarking here: https://docs.substrate.io/test/benchmark/
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
-// All pallet logic is defined in its own module and must be annotated by the `pallet` attribute.
 #[frame_support::pallet]
 pub mod pallet {
-	// Import various useful types required by all FRAME pallets.
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_support::traits::{Currency, FindAuthor};
@@ -73,8 +30,15 @@ pub mod pallet {
 	use fips204::ml_dsa_65;
 	use fips204::traits::{SerDes, Verifier};
 
-	// The `Pallet` struct serves as a placeholder to implement traits, methods and dispatchables
-	// (`Call`s) in this pallet.
+	/// 1 QCOIN in base indivisible units (Plancks). 1 QCOIN = 1_000_000_000_000 Plancks.
+	pub const UNIT: u128 = 1_000_000_000_000;
+
+	/// Maximum Total Supply Cap for QCOIN block rewards: 100,000,000 QCOIN.
+	pub const MAX_SUPPLY_CAP: u128 = 100_000_000 * UNIT;
+
+	/// Block interval per Halving Era (5,000,000 blocks ~ approx 1 year at 6s block time).
+	pub const HALVING_INTERVAL: u32 = 5_000_000;
+
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
@@ -84,32 +48,35 @@ pub mod pallet {
 		/// Rewards are credited ONLY to the validator node that ACTUALLY mined and signed the block.
 		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
 			let block_num: u32 = TryInto::<u32>::try_into(n).unwrap_or(1);
-			let (reward_amount, era) = Self::calculate_block_reward(block_num);
+			let total_minted = TotalBlockRewardsMinted::<T>::get();
+			let (reward_amount, era) = Self::calculate_block_reward(block_num, total_minted);
 
-			// Extract digest logs from current block header to find block author
-			let digest = <frame_system::Pallet<T>>::digest();
-			let pre_digests = digest.logs().iter().filter_map(|d| d.as_pre_runtime());
+			if reward_amount > 0 {
+				// Extract digest logs from current block header to find block author
+				let digest = <frame_system::Pallet<T>>::digest();
+				let pre_digests = digest.logs().iter().filter_map(|d| d.as_pre_runtime());
 
-			// Find the actual author account who signed/produced this block
-			if let Some(author) = T::FindAuthor::find_author(pre_digests) {
-				// Determine recipient: custom RewardWallet or validator's own account
-				let recipient = RewardWallets::<T>::get(&author).unwrap_or_else(|| author.clone());
+				// Find the actual author account who signed/produced this block
+				if let Some(author) = T::FindAuthor::find_author(pre_digests) {
+					// Determine recipient: custom RewardWallet or validator's own account
+					let recipient = RewardWallets::<T>::get(&author).unwrap_or_else(|| author.clone());
 
-				// Mint real QCOIN tokens into the recipient's wallet balance
-				if let Ok(amount) = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount) {
-					let _imbalance = T::Currency::deposit_creating(&recipient, amount);
+					// Mint real QCOIN tokens into the recipient's wallet balance
+					if let Ok(amount) = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount) {
+						let _imbalance = T::Currency::deposit_creating(&recipient, amount);
 
-					// Update cumulative minted rewards
-					let new_total = TotalBlockRewardsMinted::<T>::get().saturating_add(reward_amount);
-					TotalBlockRewardsMinted::<T>::put(new_total);
+						// Update cumulative minted rewards
+						let new_total = total_minted.saturating_add(reward_amount);
+						TotalBlockRewardsMinted::<T>::put(new_total);
 
-					// Emit reward distribution event
-					Self::deposit_event(Event::BlockRewardDistributed {
-						block_number: block_num,
-						reward_amount,
-						era,
-						recipient,
-					});
+						// Emit reward distribution event
+						Self::deposit_event(Event::BlockRewardDistributed {
+							block_number: block_num,
+							reward_amount,
+							era,
+							recipient,
+						});
+					}
 				}
 			}
 
@@ -236,16 +203,9 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::do_something())]
 		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
 			let who = ensure_signed(origin)?;
-
-			// Update storage.
 			Something::<T>::put(something);
-
-			// Emit an event.
 			Self::deposit_event(Event::SomethingStored { something, who });
-
-			// Return a successful `DispatchResult`
 			Ok(())
 		}
 
@@ -254,16 +214,10 @@ pub mod pallet {
 		#[pallet::weight(T::WeightInfo::cause_error())]
 		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
 			let _who = ensure_signed(origin)?;
-
-			// Read a value from storage.
 			match Something::<T>::get() {
-				// Return an error if the value has not been set.
 				None => Err(Error::<T>::NoneValue.into()),
 				Some(old) => {
-					// Increment the value read from storage. This will cause an error in the event
-					// of overflow.
 					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
 					Something::<T>::put(new);
 					Ok(())
 				},
@@ -279,22 +233,16 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			// Validate length (ML-DSA-65 public key size is 1952 bytes)
 			let pk_bytes: &[u8; ml_dsa_65::PK_LEN] = public_key
 				.as_slice()
 				.try_into()
 				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
 
-			// Validate public key structure
 			let _pk = ml_dsa_65::PublicKey::try_from_bytes(*pk_bytes)
 				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
 
-			// Store public key in storage
 			PqPublicKeys::<T>::insert(&who, public_key);
-
-			// Emit event
 			Self::deposit_event(Event::PqPublicKeyRegistered { who });
-
 			Ok(())
 		}
 
@@ -308,7 +256,6 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			// Retrieve caller's registered post-quantum public key
 			let stored_pk = PqPublicKeys::<T>::get(&who).ok_or(Error::<T>::PqKeyNotFound)?;
 
 			let pk_bytes: &[u8; ml_dsa_65::PK_LEN] = stored_pk
@@ -319,16 +266,13 @@ pub mod pallet {
 			let pk = ml_dsa_65::PublicKey::try_from_bytes(*pk_bytes)
 				.map_err(|_| Error::<T>::InvalidPqPublicKey)?;
 
-			// Convert signature bytes (ML-DSA-65 signature size is 3309 bytes)
 			let sig_bytes: &[u8; ml_dsa_65::SIG_LEN] = signature
 				.as_slice()
 				.try_into()
 				.map_err(|_| Error::<T>::InvalidPqSignature)?;
 
-			// Verify post-quantum signature on-chain (using empty domain separation context b"")
 			ensure!(pk.verify(message.as_slice(), sig_bytes, b""), Error::<T>::PqVerificationFailed);
 
-			// Increment total verified count
 			let new_count = VerifiedPqCount::<T>::get()
 				.checked_add(1)
 				.ok_or(Error::<T>::StorageOverflow)?;
@@ -342,49 +286,8 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Claim block reward with Halving Schedule for active validator node.
-		/// Rewards are minted and deposited into the validator's chosen reward wallet.
-		/// If no reward wallet is configured, rewards go to the caller's own account.
-		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::claim_block_reward())]
-		pub fn claim_block_reward(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-
-			// Verify the caller is an approved validator
-			ensure!(ApprovedValidators::<T>::get(&who), Error::<T>::NotApprovedValidator);
-
-			let current_block = <frame_system::Pallet<T>>::block_number();
-			let block_num: u32 = TryInto::<u32>::try_into(current_block).unwrap_or(1);
-
-			// Calculate block reward & current era
-			let (reward_amount, era) = Self::calculate_block_reward(block_num);
-
-			// Determine the reward recipient: custom wallet or validator's own account
-			let recipient = RewardWallets::<T>::get(&who).unwrap_or(who.clone());
-
-			// Mint the reward coins and deposit them into the recipient's account
-			let amount = <T::Currency as Currency<T::AccountId>>::Balance::try_from(reward_amount)
-				.map_err(|_| Error::<T>::StorageOverflow)?;
-			let _imbalance = T::Currency::deposit_creating(&recipient, amount);
-
-			// Update total rewards storage
-			let new_total = TotalBlockRewardsMinted::<T>::get()
-				.saturating_add(reward_amount);
-			TotalBlockRewardsMinted::<T>::put(new_total);
-
-			// Emit block reward distribution event
-			Self::deposit_event(Event::BlockRewardDistributed {
-				block_number: block_num,
-				reward_amount,
-				era,
-				recipient,
-			});
-
-			Ok(())
-		}
-
 		/// Approve a new validator node by Sudo Master Key.
-		#[pallet::call_index(5)]
+		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::add_validator())]
 		pub fn add_validator(
 			origin: OriginFor<T>,
@@ -404,7 +307,7 @@ pub mod pallet {
 		}
 
 		/// Revoke validator node approval by Sudo Master Key.
-		#[pallet::call_index(6)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::remove_validator())]
 		pub fn remove_validator(
 			origin: OriginFor<T>,
@@ -422,9 +325,8 @@ pub mod pallet {
 		}
 
 		/// Register self as an approved validator node by providing the node's local Session Key.
-		/// The caller's signed AccountId (`who`) is mapped as the reward recipient wallet for this validator node.
-		/// Optionally specify a different reward_wallet to receive block mining rewards.
-		#[pallet::call_index(7)]
+		/// Optionally specify a custom reward_wallet to receive block mining rewards.
+		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::register_validator())]
 		pub fn register_validator(
 			origin: OriginFor<T>,
@@ -435,7 +337,6 @@ pub mod pallet {
 
 			ApprovedValidators::<T>::insert(&who, true);
 
-			// If the user specified a custom reward wallet, store it
 			if let Some(ref wallet) = reward_wallet {
 				RewardWallets::<T>::insert(&who, wallet);
 			}
@@ -449,8 +350,8 @@ pub mod pallet {
 		}
 
 		/// Change the reward wallet address for a validator node.
-		/// Rewards from future mined blocks will go to the new wallet. This transaction is fee-free.
-		#[pallet::call_index(8)]
+		/// Rewards from future mined blocks will go to the new wallet.
+		#[pallet::call_index(7)]
 		#[pallet::weight((T::WeightInfo::register_validator(), DispatchClass::Normal, Pays::No))]
 		pub fn set_reward_wallet(
 			origin: OriginFor<T>,
@@ -465,23 +366,41 @@ pub mod pallet {
 	}
 
 	impl<T: Config> Pallet<T> {
-		/// Calculates the block reward and era based on current block height and Halving schedule.
+		/// Calculates the block reward and era based on current block height, total minted rewards,
+		/// and Bitcoin-style Halving schedule.
 		///
 		/// - Era 1 (Blocks 1 - 5,000,000): 10 QCOIN (10,000,000,000,000 Plancks)
 		/// - Era 2 (Blocks 5,000,001 - 10,000,000): 5 QCOIN (5,000,000,000,000 Plancks) [Halving 1]
 		/// - Era 3 (Blocks 10,000,001 - 15,000,000): 2.5 QCOIN (2,500,000,000,000 Plancks) [Halving 2]
-		/// - Era 4+ (Blocks 15,000,001+): 1.25 QCOIN (1,250,000,000,000 Plancks) [Halving 3]
-		pub fn calculate_block_reward(block_number: u32) -> (u128, u32) {
-			const UNIT: u128 = 1_000_000_000_000;
-			if block_number <= 5_000_000 {
-				(10 * UNIT, 1)
-			} else if block_number <= 10_000_000 {
-				(5 * UNIT, 2)
-			} else if block_number <= 15_000_000 {
-				(2_500_000_000_000, 3)
-			} else {
-				(1_250_000_000_000, 4)
+		/// - Era 4 (Blocks 15,000,001 - 20,000,000): 1.25 QCOIN (1,250,000,000,000 Plancks) [Halving 3]
+		/// - Era N: Halves reward every 5,000,000 blocks until max supply cap (100,000,000 QCOIN).
+		pub fn calculate_block_reward(block_number: u32, total_minted: u128) -> (u128, u32) {
+			if total_minted >= MAX_SUPPLY_CAP || block_number == 0 {
+				return (0, 0);
 			}
+
+			// Determine Era (1-indexed)
+			let era = ((block_number.saturating_sub(1)) / HALVING_INTERVAL) + 1;
+
+			let initial_reward: u128 = 10 * UNIT;
+			let shift = era.saturating_sub(1);
+
+			let base_reward = if shift >= 64 {
+				0
+			} else {
+				initial_reward >> shift
+			};
+
+			if base_reward == 0 {
+				return (0, era);
+			}
+
+			// Enforce Maximum Total Supply Cap
+			let max_remaining = MAX_SUPPLY_CAP.saturating_sub(total_minted);
+			let reward_amount = base_reward.min(max_remaining);
+
+			(reward_amount, era)
 		}
 	}
 }
+

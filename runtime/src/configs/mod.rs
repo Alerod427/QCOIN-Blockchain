@@ -179,6 +179,14 @@ impl frame_support::traits::FindAuthor<AccountId> for AuraAuthorFinder {
 				}
 			}
 		}
+		// Fallback: If no pre-runtime digest is present, attempt to return primary authority
+		let authorities = pallet_aura::Authorities::<Runtime>::get();
+		if let Some(first_aura_id) = authorities.first() {
+			let raw_slice: &[u8] = first_aura_id.as_ref();
+			if let Ok(raw_bytes) = <[u8; 32]>::try_from(raw_slice) {
+				return Some(AccountId::from(raw_bytes));
+			}
+		}
 		None
 	}
 }

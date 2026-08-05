@@ -22,6 +22,7 @@ fips204 = { version = "0.4", default-features = false, features = ["ml-dsa-65"] 
 
 [dev-dependencies]
 fips204 = { version = "0.4", default-features = false, features = ["ml-dsa-65", "default-rng"] }
+pallet-balances = { default-features = true, workspace = true }
 sp-core = { default-features = true, workspace = true }
 sp-io = { default-features = true, workspace = true }
 sp-runtime = { default-features = true, workspace = true }
