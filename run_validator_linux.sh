@@ -94,13 +94,12 @@ ${DOCKER_CMD} run -d --name qcoin-validator \
   qcoin-node:latest \
   --base-path /data \
   --chain /qcoin/qcoin_mainnet_spec.json \
-  --validator \
   --no-telemetry \
   --unsafe-rpc-external \
   --rpc-cors all \
   --rpc-methods unsafe \
   --node-key ${NODE_KEY} \
-  --bootnodes /ip4/172.17.0.1/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P
+  --bootnodes /ip4/10.0.0.90/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
 
 if [ -n "${REWARD_WALLET}" ]; then
     echo "[INFO] Vinculando cartera ${REWARD_WALLET} en la blockchain..."

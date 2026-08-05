@@ -69,7 +69,7 @@ if not exist ".node_key" (
 )
 set /p NODE_KEY=<.node_key
 
-docker run -d --name qcoin-validator --add-host=host.docker.internal:host-gateway -p 30333:30333 -p 9944:9944 -v qcoin_data_v110:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --no-telemetry --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key %NODE_KEY% --bootnodes /ip4/10.0.0.90/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P
+docker run -d --name qcoin-validator --add-host=host.docker.internal:host-gateway -p 30333:30333 -p 9944:9944 -v qcoin_data_v110:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --no-telemetry --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key %NODE_KEY% --bootnodes /ip4/10.0.0.90/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
 
 if not "%REWARD_WALLET%"=="" (
     echo [INFO] Vinculando cartera %REWARD_WALLET% en la blockchain...
