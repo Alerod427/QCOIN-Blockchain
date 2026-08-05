@@ -76,7 +76,7 @@ ${DOCKER_CMD} run -d --name qcoin-validator \
   --add-host=host.docker.internal:host-gateway \
   -p 30333:30333 \
   -p 9944:9944 \
-  -v qcoin_data_v109:/data \
+  -v qcoin_data_v110:/data \
   -v "$(pwd)":/qcoin \
   ${SSL_MOUNT} \
   qcoin-node:latest \
