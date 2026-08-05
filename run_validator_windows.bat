@@ -10,9 +10,15 @@ echo.
 
 echo [1/2] Checking environment...
 
-:: Check Docker Desktop first
-docker --version >nul 2>&1
+:: Check Docker Desktop daemon status
+docker info >nul 2>&1
 if %errorlevel% equ 0 goto USE_DOCKER
+
+:: Check if Docker CLI is installed but daemon is stopped
+docker --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set DOCKER_STOPPED=1
+)
 
 :: Check WSL next
 wsl --status >nul 2>&1
@@ -20,6 +26,13 @@ if %errorlevel% equ 0 goto USE_WSL
 
 :: Check native exe
 if exist "solochain-template-node.exe" goto USE_EXE
+
+if defined DOCKER_STOPPED (
+    echo [ERROR] Docker Desktop esta instalado pero NO esta iniciado.
+    echo.
+    echo Por favor, abre la aplicacion 'Docker Desktop' en Windows, espera a que el icono cambie a verde (Engine running) y vuelve a ejecutar este archivo.
+    goto END
+)
 
 goto NO_ENV
 
