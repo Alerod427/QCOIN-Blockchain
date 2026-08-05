@@ -46,10 +46,7 @@ echo ""
 
 echo "🚀 Iniciando Validador de QCOIN en Modo Docker..."
 
-# Stop any conflicting background native node or previous container using ports 9944/30333
-pkill -9 -f "solochain-template-node" >/dev/null 2>&1 || true
-fuser -k 9944/tcp >/dev/null 2>&1 || true
-fuser -k 30333/tcp >/dev/null 2>&1 || true
+# Stop any previous validator container
 ${DOCKER_CMD} stop qcoin-validator >/dev/null 2>&1 || true
 ${DOCKER_CMD} rm qcoin-validator >/dev/null 2>&1 || true
 
