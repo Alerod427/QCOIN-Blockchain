@@ -73,6 +73,7 @@ fi
 
 # Run validator container
 ${DOCKER_CMD} run -d --name qcoin-validator \
+  --add-host=host.docker.internal:host-gateway \
   -p 30333:30333 \
   -p 9944:9944 \
   -v qcoin_data_v109:/data \
@@ -87,7 +88,7 @@ ${DOCKER_CMD} run -d --name qcoin-validator \
   --rpc-cors all \
   --rpc-methods unsafe \
   --node-key 8dd6190191a6062364d12d7449fa120de8b16bba48f6fc6903a19c04ee289193 \
-  --bootnodes /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
+  --bootnodes /ip4/172.17.0.1/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWSNfi1qbFrBrQrauyeDBPEyxSpdxoi1tqW8EdHNuGz3hG
 
 if [ -n "${REWARD_WALLET}" ]; then
     echo "[INFO] Vinculando cartera ${REWARD_WALLET} en la blockchain..."
