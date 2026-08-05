@@ -50,10 +50,14 @@ echo "🚀 Iniciando Validador de QCOIN en Modo Docker..."
 ${DOCKER_CMD} stop qcoin-validator >/dev/null 2>&1 || true
 ${DOCKER_CMD} rm qcoin-validator >/dev/null 2>&1 || true
 
-# Ensure release binary exists locally before building container
+# Ensure release binary exists locally or build via Docker
 if [ ! -f "target/release/solochain-template-node" ]; then
-    echo "[INFO] Compilando ejecutable nativo de QCOIN (cargo build --release)..."
-    cargo build --release
+    if command -v cargo >/dev/null 2>&1; then
+        echo "[INFO] Compilando ejecutable nativo de QCOIN (cargo build --release)..."
+        cargo build --release
+    else
+        echo "[INFO] Cargo no está instalado en el sistema anfitrión. Docker compilará el nodo automáticamente dentro del contenedor."
+    fi
 fi
 
 # Build docker image if missing
