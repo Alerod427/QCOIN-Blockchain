@@ -78,7 +78,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/free-disk-space
+      - uses: ./.github/actions/ubuntu-dependencies
+
+      - name: Build node in release mode
+        run: cargo build --package solochain-template-node --release
+        timeout-minutes: 90
 
       - name: Build the Dockerfile
         run: docker build . -t polkadot-sdk-solochain-template
-        timeout-minutes: 90
+        timeout-minutes: 30
