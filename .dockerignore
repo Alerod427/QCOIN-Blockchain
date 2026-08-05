@@ -1,5 +1,4 @@
-target/*
-!target/release/solochain-template-node
+target/
 data/
 data_v*/
 logs/
