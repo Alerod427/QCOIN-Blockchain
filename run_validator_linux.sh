@@ -72,6 +72,17 @@ if [ -d "/etc/ssl/certs" ]; then
     SSL_MOUNT="-v /etc/ssl/certs:/etc/ssl/certs:ro"
 fi
 
+# Generate a unique persistent node key for this machine if not present
+NODE_KEY_FILE=".node_key"
+if [ ! -f "${NODE_KEY_FILE}" ]; then
+    if command -v openssl >/dev/null 2>&1; then
+        openssl rand -hex 32 > "${NODE_KEY_FILE}"
+    else
+        date +%s%N | md5sum | head -c 64 > "${NODE_KEY_FILE}"
+    fi
+fi
+NODE_KEY=$(cat "${NODE_KEY_FILE}" | tr -d '\r\n ')
+
 # Run validator container
 ${DOCKER_CMD} run -d --name qcoin-validator \
   --add-host=host.docker.internal:host-gateway \
@@ -88,6 +99,7 @@ ${DOCKER_CMD} run -d --name qcoin-validator \
   --unsafe-rpc-external \
   --rpc-cors all \
   --rpc-methods unsafe \
+  --node-key ${NODE_KEY} \
   --bootnodes /ip4/172.17.0.1/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P
 
 if [ -n "${REWARD_WALLET}" ]; then

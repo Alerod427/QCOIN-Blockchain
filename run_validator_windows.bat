@@ -63,9 +63,13 @@ if %errorlevel% neq 0 (
     docker build -t qcoin-node:latest .
 )
 
-:: Start container with inline node key and external RPC access
-:: Each validator operator should replace this key with their own unique 64-char hex string
-docker run -d --name qcoin-validator --add-host=host.docker.internal:host-gateway -p 30333:30333 -p 9944:9944 -v qcoin_data_v110:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --no-telemetry --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --bootnodes /ip4/10.0.0.90/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P
+:: Generate a unique persistent node key for this machine if not present
+if not exist ".node_key" (
+    powershell -Command "[byte[]]$b = 1..32 | %% {Get-Random -Minimum 0 -Maximum 256}; [System.BitConverter]::ToString($b).Replace('-','').ToLower()" > .node_key
+)
+set /p NODE_KEY=<.node_key
+
+docker run -d --name qcoin-validator --add-host=host.docker.internal:host-gateway -p 30333:30333 -p 9944:9944 -v qcoin_data_v110:/data -v "%cd%":/qcoin qcoin-node:latest --base-path /data --chain /qcoin/qcoin_mainnet_spec.json --validator --no-telemetry --unsafe-rpc-external --rpc-cors all --rpc-methods unsafe --node-key %NODE_KEY% --bootnodes /ip4/10.0.0.90/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P /ip4/158.179.211.45/tcp/30333/p2p/12D3KooWLz3Yj6Bxi5FdQDfKjkn7J1K535jbT2WhFD373EdP5z7P
 
 if not "%REWARD_WALLET%"=="" (
     echo [INFO] Vinculando cartera %REWARD_WALLET% en la blockchain...
