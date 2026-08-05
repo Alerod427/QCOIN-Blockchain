@@ -65,16 +65,24 @@ if ! ${DOCKER_CMD} image inspect qcoin-node:latest >/dev/null 2>&1; then
     ${DOCKER_CMD} build -t qcoin-node:latest .
 fi
 
+# Mount host SSL certs if available
+SSL_MOUNT=""
+if [ -d "/etc/ssl/certs" ]; then
+    SSL_MOUNT="-v /etc/ssl/certs:/etc/ssl/certs:ro"
+fi
+
 # Run validator container
 ${DOCKER_CMD} run -d --name qcoin-validator \
   -p 30333:30333 \
   -p 9944:9944 \
   -v qcoin_data_v109:/data \
   -v "$(pwd)":/qcoin \
+  ${SSL_MOUNT} \
   qcoin-node:latest \
   --base-path /data \
   --chain /qcoin/qcoin_mainnet_spec.json \
   --validator \
+  --no-telemetry \
   --unsafe-rpc-external \
   --rpc-cors all \
   --rpc-methods unsafe \
